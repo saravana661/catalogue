@@ -71,7 +71,7 @@ function Footer() {
 
         <div className="d-flex justify-content-between align-items-center pb-3 flex-wrap">
           <span className="small" style={{ opacity: 0.8 }}>
-            © {new Date().getFullYear()} Pothys Swarna Mahal. All rights reserved.
+            © {new Date().getFullYear()} JewelSphere. All rights reserved.
           </span>
 
           <div className="d-flex gap-3">
