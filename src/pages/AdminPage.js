@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
+import api from "../api/axios";
 
 const ADMIN_USER = "admin";
 const ADMIN_PASS = "admin123"; // local fallback when API/DB is unreachable
@@ -21,9 +22,9 @@ function AdminPage() {
   useEffect(() => {
     if (!loggedIn) return;
     setLoading(true);
-    fetch("http://localhost:5000/api/orders")
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data) => setOrders(Array.isArray(data) ? data : []))
+    api
+      .get("/orders")
+      .then((res) => setOrders(Array.isArray(res.data) ? res.data : []))
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));
   }, [loggedIn]);
@@ -34,13 +35,11 @@ function AdminPage() {
     setBusy(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/adminLogin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: username.trim(), password }),
+      const res = await api.post("/adminLogin", {
+        email: username.trim(),
+        password,
       });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data.role === "admin") {
+      if (res.data.role === "admin") {
         sessionStorage.setItem("pothysAdmin", "1");
         setLoggedIn(true);
       } else {
@@ -49,15 +48,19 @@ function AdminPage() {
           sessionStorage.setItem("pothysAdmin", "1");
           setLoggedIn(true);
         } else {
-          setError(data.error || "Invalid admin credentials");
+          setError("Invalid admin credentials");
         }
       }
     } catch (err) {
+      // 401 from server, or network/server down
       if (username === ADMIN_USER && password === ADMIN_PASS) {
         sessionStorage.setItem("pothysAdmin", "1");
         setLoggedIn(true);
       } else {
-        setError("Server unreachable. Check credentials or start the server.");
+        setError(
+          err.response?.data?.error ||
+            "Server unreachable. Check credentials or start the server."
+        );
       }
     } finally {
       setBusy(false);

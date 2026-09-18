@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useLoginModal } from "../context/LoginModalContext";
+import api from "../api/axios";
 
 function CartPage() {
   const { isAuthenticated, user } = useAuth();
@@ -33,19 +34,14 @@ function CartPage() {
     setPlacing(true);
     setOrderError("");
     try {
-      const res = await fetch("http://localhost:5000/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: cart,
-          customer: {
-            name: user?.name || "Guest",
-            email: user?.email || "",
-            provider: user?.provider || "",
-          },
-        }),
+      await api.post("/orders", {
+        items: cart,
+        customer: {
+          name: user?.name || "Guest",
+          email: user?.email || "",
+          provider: user?.provider || "",
+        },
       });
-      if (!res.ok) throw new Error("Order failed");
       clearCart();
       setPurchased(true);
       setTimeout(() => {

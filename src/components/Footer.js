@@ -59,10 +59,10 @@ function Footer() {
               <i className="bi bi-geo-alt me-2"></i> Chennai, Tamil Nadu
             </p>
             <p className="small mb-2">
-              <i className="bi bi-telephone me-2"></i> +91 98765 43210
+              <i className="bi bi-telephone me-2"></i> +91 9940344758
             </p>
             <p className="small">
-              <i className="bi bi-envelope me-2"></i> support@pothys.com
+              <i className="bi bi-envelope me-2"></i> saravanachanran495@gmail.com
             </p>
           </div>
         </div>

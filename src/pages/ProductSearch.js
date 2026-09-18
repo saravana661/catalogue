@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
+import api from "../api/axios";
 
 // Fixed catalogue category chips (GOLD by MetalCode, rest by product name LIKE)
 // pro/nopro accept comma-separated keywords (OR'd includes / AND NOT excludes)
@@ -41,9 +42,8 @@ function ProductSearch({ onSearchResult, keyword, onKeywordChange }) {
     if (tag) params.append("tag", tag);
 
     setLoading(true);
-    fetch(`http://localhost:5000/api/goldProducts/search?${params.toString()}`)
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data) => onSearchResult(data || []))
+    api.get("/goldProducts/search", { params })
+      .then((res) => onSearchResult(res.data || []))
       .catch(() => {
         setError("Could not fetch products. Is the server running?");
         onSearchResult([]);

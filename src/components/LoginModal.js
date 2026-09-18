@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../context/AuthContext";
 import { useLoginModal } from "../context/LoginModalContext";
-
-const API = "http://localhost:5000/api";
+import api from "../api/axios";
 
 // Local fallback users (used only if the API/DB is unreachable)
 const validUsers = [
@@ -13,13 +12,16 @@ const validUsers = [
 ];
 
 async function postAuth(path, body) {
-  const res = await fetch(`${API}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json().catch(() => ({}));
-  return { ok: res.ok, data, status: res.status };
+  try {
+    const res = await api.post(path, body);
+    return { ok: true, data: res.data, status: res.status };
+  } catch (err) {
+    return {
+      ok: false,
+      data: err.response?.data || {},
+      status: err.response?.status || 0,
+    };
+  }
 }
 
 function LoginModal() {
