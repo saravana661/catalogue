@@ -35,6 +35,11 @@ function Navbar({ onSearch, searchTerm }) {
     else requireLogin(() => navigate("/wishlist"));
   };
 
+  const openOrders = () => {
+    if (isAuthenticated) navigate("/my-orders");
+    else requireLogin(() => navigate("/my-orders"));
+  };
+
   return (
     <div className="navbar-sticky">
       <nav className="navbar navbar-expand-lg navbar-white bg-white navbar-shadow">
@@ -79,6 +84,18 @@ function Navbar({ onSearch, searchTerm }) {
                 <div className="fw-semibold user-name">{displayName}</div>
               </div>
             </div>
+
+            {/* My Orders */}
+            <motion.button
+              className="nav-icon-btn"
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.85 }}
+              onClick={openOrders}
+              aria-label="my orders"
+              title="My Orders"
+            >
+              <i className="bi bi-bag-check fs-5"></i>
+            </motion.button>
 
             {/* Wishlist */}
             <motion.button
