@@ -9,8 +9,8 @@ import axios from "axios";
 // .env.local overrides .env, so you can keep your live URL in
 // .env.local without touching the committed .env. No code changes needed.
 // ─────────────────────────────────────────────────────────────────────────
-
-const BASE_URL ="https://kalash.app/api";
+//http://localhost:5000/api
+const BASE_URL ="http://localhost:5000/api";
 
 const api = axios.create({
   baseURL: BASE_URL,

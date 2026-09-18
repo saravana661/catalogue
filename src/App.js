@@ -5,6 +5,7 @@ import "./App.css";
 import ProductPage from "./pages/ProductPage";
 import CartPage from "./pages/CartPage";
 import WishlistPage from "./pages/WishlistPage";
+import MyOrdersPage from "./pages/MyOrdersPage";
 import AdminPage from "./pages/AdminPage";
 
 import Navbar from "./components/Navbar";
@@ -50,6 +51,19 @@ function AppInner() {
                 <Navbar searchTerm={globalSearch} onSearch={setGlobalSearch} />
                 <div className="Main">
                   <WishlistPage />
+                </div>
+                <Footer />
+              </div>
+            }
+          />
+
+          <Route
+            path="/my-orders"
+            element={
+              <div className="page-shell">
+                <Navbar searchTerm={globalSearch} onSearch={setGlobalSearch} />
+                <div className="Main">
+                  <MyOrdersPage />
                 </div>
                 <Footer />
               </div>

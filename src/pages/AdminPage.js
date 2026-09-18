@@ -243,6 +243,12 @@ function AdminPage() {
                           </span>
                         )}
                       </div>
+                      {order.remarks && (
+                        <div className="order-remarks">
+                          <i className="bi bi-chat-left-quote me-1"></i>
+                          <strong>Remark:</strong> {order.remarks}
+                        </div>
+                      )}
                       <div className="table-responsive">
                         <table className="table table-sm align-middle order-table">
                           <thead>

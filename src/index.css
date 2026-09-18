@@ -1175,6 +1175,49 @@ code {
   color: #6c757d;
   padding: 10px 0 12px;
 }
+.order-remarks {
+  background: #fdfbf3;
+  border-left: 3px solid #d4af37;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  color: #5c5346;
+  margin-bottom: 12px;
+}
+.confirm-remarks {
+  margin: 14px 0;
+}
+.confirm-remarks label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #5c5346;
+  margin-bottom: 6px;
+  display: block;
+}
+.confirm-remarks textarea {
+  width: 100%;
+  border: 1.5px solid #e2c98c;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.86rem;
+  resize: vertical;
+  background: #fffdf7;
+}
+.confirm-remarks textarea:focus {
+  outline: none;
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+.order-no-chip {
+  background: #fdfbf3;
+  border: 1.5px dashed #d4af37;
+  color: #8a6d3b;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 8px 20px;
+  border-radius: 50px;
+  margin: 6px 0 4px;
+}
 .order-table {
   margin: 0;
   font-size: 0.85rem;

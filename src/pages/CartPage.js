@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useLoginModal } from "../context/LoginModalContext";
@@ -10,12 +10,13 @@ function CartPage() {
   const { isAuthenticated, user } = useAuth();
   const { requireLogin } = useLoginModal();
   const { cart, removeFromCart, updateQty, clearCart } = useCart();
-  const navigate = useNavigate();
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [placing, setPlacing] = useState(false);
   const [purchased, setPurchased] = useState(false);
   const [orderError, setOrderError] = useState("");
+  const [remarks, setRemarks] = useState("");
+  const [placedOrder, setPlacedOrder] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated) requireLogin();
@@ -34,22 +35,31 @@ function CartPage() {
     setPlacing(true);
     setOrderError("");
     try {
-      await api.post("/orders", {
-        items: cart,
+      // Strip heavy image data from the payload (never stored for orders)
+      const cleanItems = cart.map((item) => ({
+        id: item.id,
+        SubProName: item.SubProName,
+        ProName: item.ProName,
+        TagNo: item.TagNo,
+        NetWt: item.NetWt,
+        metal: item.metal || item.MetalName,
+        qty: item.qty,
+      }));
+      const res = await api.post("/orders", {
+        items: cleanItems,
         customer: {
           name: user?.name || "Guest",
           email: user?.email || "",
           provider: user?.provider || "",
         },
+        remarks: remarks.trim(),
       });
+      setPlacedOrder(res.data);
       clearCart();
       setPurchased(true);
-      setTimeout(() => {
-        setPurchased(false);
-        navigate("/");
-      }, 2600);
     } catch (err) {
       setOrderError("Could not place order. Server may be offline.");
+      setShowConfirm(true);
     } finally {
       setPlacing(false);
     }
@@ -73,7 +83,17 @@ function CartPage() {
         </motion.div>
         <h3>Order Placed Successfully!</h3>
         <p>Thank you for shopping with Pothys Swarna Mahal</p>
-        <div className="spinner-border text-warning mt-3"></div>
+        {placedOrder?.orderNo && (
+          <div className="order-no-chip">{placedOrder.orderNo}</div>
+        )}
+        <div className="d-flex gap-2 justify-content-center mt-3">
+          <Link to="/my-orders" className="btn btn-gold">
+            <i className="bi bi-bag-check me-2"></i> My Orders
+          </Link>
+          <Link to="/" className="btn btn-outline-dark">
+            <i className="bi bi-arrow-left me-2"></i> Continue Shopping
+          </Link>
+        </div>
       </motion.div>
     );
   }
@@ -235,6 +255,22 @@ function CartPage() {
                 <strong>{totalItems} item(s)</strong>. A boutique representative
                 will contact you to finalise the purchase.
               </p>
+
+              <div className="confirm-remarks">
+                <label htmlFor="order-remarks">
+                  <i className="bi bi-chat-left-text me-1"></i> Remarks
+                  <span className="text-muted"> (optional)</span>
+                </label>
+                <textarea
+                  id="order-remarks"
+                  rows="3"
+                  maxLength="500"
+                  placeholder="Any special instructions for your order..."
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
+                ></textarea>
+              </div>
+
               {orderError && (
                 <p className="error-text">
                   <i className="bi bi-exclamation-circle me-1"></i>
