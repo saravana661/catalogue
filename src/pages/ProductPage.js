@@ -53,6 +53,7 @@ function ProductPage({ initialTerm = "" }) {
 
       <ProductSearch
         onSearchResult={handleSearchResult}
+        onSearchStart={() => setLoading(true)}
         keyword={keyword}
         onKeywordChange={setKeyword}
       />
@@ -64,7 +65,7 @@ function ProductPage({ initialTerm = "" }) {
         </div>
 
         {loading ? (
-          <Loader />
+          <Loader message="Polishing your jewellery designs..." />
         ) : products.length === 0 ? (
           <motion.div
             className="empty-state"

@@ -15,7 +15,7 @@ const CATEGORIES = [
   { label: "COINS AND BARS", param: "pro", value: "COIN,BAR", nopro: "MALABAR,SOUND", noImg: true },
 ];
 
-function ProductSearch({ onSearchResult, keyword, onKeywordChange }) {
+function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart }) {
   const [activeCat, setActiveCat] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -43,6 +43,7 @@ function ProductSearch({ onSearchResult, keyword, onKeywordChange }) {
     if (tag) params.append("tag", tag);
 
     setLoading(true);
+    if (onSearchStart) onSearchStart();
     api
       .get("/goldProducts/search", { params })
       .then((res) => onSearchResult(res.data || []))
