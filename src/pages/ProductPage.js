@@ -39,7 +39,9 @@ function ProductPage({ initialTerm = "" }) {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="site-hero-title">JewelSphere Online</h1>
+          
+{/*JewelSphere Online */ }
+          <h1 className="site-hero-title">Pothys Swarnamahal</h1>
           <p>Explore timeless gold, silver, diamond & platinum designs</p>
         </motion.div>
         <motion.div

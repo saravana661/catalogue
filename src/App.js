@@ -29,7 +29,7 @@ function AppInner() {
                 <Footer />
               </div>
             }
-          />
+          />   
 
           <Route
             path="/cart"
@@ -66,7 +66,7 @@ function AppInner() {
                   <MyOrdersPage />
                 </div>
                 <Footer />
-              </div>
+              </div>  
             }
           />
 

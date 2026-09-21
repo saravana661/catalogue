@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
+import { formatTag } from "../utils/format";
 import { useLoginModal } from "../context/LoginModalContext";
 
 function WishlistPage() {
@@ -98,7 +99,10 @@ function WishlistPage() {
                         </span>
                       )}
                       <span>Net Wt: {item.NetWt} g</span>
-                      <span>{item.TagNo}</span>
+                      <span className="text-muted">
+                        <i className="bi bi-tag me-1"></i>
+                        {formatTag(item.TagNo)}
+                      </span>
                     </div>
                     <motion.button
                       className="add-btn w-100"

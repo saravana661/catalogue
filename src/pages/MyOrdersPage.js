@@ -3,8 +3,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useLoginModal } from "../context/LoginModalContext";
+import { formatTag } from "../utils/format";
 import Loader from "../components/Loader";
 import api from "../api/axios";
+
+const ORDER_STATUSES = ["Order Placed", "Work in Progress", "Shipped", "Delivered"];
+
+const clsStatus = (status) =>
+  `status-${String(status || "Order Placed").toLowerCase().replace(/\s+/g, "-")}`;
 
 function MyOrdersPage() {
   const { isAuthenticated, user } = useAuth();
@@ -96,82 +102,109 @@ function MyOrdersPage() {
       ) : (
         <div className="orders-list">
           <AnimatePresence>
-            {orders.map((order) => (
-              <motion.div
-                key={order.id}
-                className="order-card"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <button
-                  className="order-card-head"
-                  onClick={() =>
-                    setExpanded(expanded === order.id ? null : order.id)
-                  }
+            {orders.map((order) => {
+              const curStatus = order.status || "Order Placed";
+              const statusIdx = ORDER_STATUSES.indexOf(curStatus);
+              return (
+                <motion.div
+                  key={order.id}
+                  className="order-card"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                 >
-                  <div>
-                    <span className="order-id">{order.id}</span>
-                    <span className="order-date">{fmtDate(order.createdAt)}</span>
-                  </div>
-                  <div className="d-flex align-items-center gap-3">
-                    <span className="order-items-badge">
-                      {order.totalItems} items
-                    </span>
-                    <i
-                      className={`bi ${
-                        expanded === order.id ? "bi-chevron-up" : "bi-chevron-down"
-                      }`}
-                    ></i>
-                  </div>
-                </button>
+                  <button
+                    className="order-card-head"
+                    onClick={() =>
+                      setExpanded(expanded === order.id ? null : order.id)
+                    }
+                  >
+                    <div>
+                      <span className="order-id">{order.id}</span>
+                      <span className="order-date">{fmtDate(order.createdAt)}</span>
+                    </div>
+                    <div className="d-flex align-items-center gap-3">
+                      <span className={`status-badge ${clsStatus(curStatus)}`}>
+                        {curStatus}
+                      </span>
+                      <span className="order-items-badge">{order.totalItems} items</span>
+                      <i
+                        className={`bi ${
+                          expanded === order.id ? "bi-chevron-up" : "bi-chevron-down"
+                        }`}
+                      ></i>
+                    </div>
+                  </button>
 
-                <AnimatePresence>
-                  {expanded === order.id && (
-                    <motion.div
-                      className="order-card-body"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                    >
-                      {order.remarks && (
-                        <div className="order-remarks">
-                          <i className="bi bi-chat-left-quote me-1"></i>
-                          <strong>Remark:</strong> {order.remarks}
+                  <AnimatePresence>
+                    {expanded === order.id && (
+                      <motion.div
+                        className="order-card-body"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                      >
+                        <div className="order-track">
+                          {ORDER_STATUSES.map((s, i) => (
+                            <div
+                              key={s}
+                              className={`track-step ${i <= statusIdx ? "done" : ""} ${
+                                i === statusIdx ? "current" : ""
+                              }`}
+                            >
+                              <span className="track-dot">
+                                {i < statusIdx ? (
+                                  <i className="bi bi-check-lg"></i>
+                                ) : i === statusIdx ? (
+                                  <i className="bi bi-gem"></i>
+                                ) : (
+                                  i + 1
+                                )}
+                              </span>
+                              <span className="track-label">{s}</span>
+                            </div>
+                          ))}
                         </div>
-                      )}
-                      <div className="table-responsive">
-                        <table className="table table-sm align-middle order-table">
-                          <thead>
-                            <tr>
-                              <th>#</th>
-                              <th>Design</th>
-                              <th>Type</th>
-                              <th>Metal</th>
-                              <th>Tag No</th>
-                              <th>Net Wt (g)</th>
-                              <th>Qty</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {order.items.map((it, i) => (
-                              <tr key={i}>
-                                <td>{i + 1}</td>
-                                <td>{it.SubProName}</td>
-                                <td>{it.ProName || "-"}</td>
-                                <td>{it.metal || "-"}</td>
-                                <td>{it.TagNo || "-"}</td>
-                                <td>{it.NetWt}</td>
-                                <td>{it.qty}</td>
+
+                        {order.remarks && (
+                          <div className="order-remarks">
+                            <i className="bi bi-chat-left-quote me-1"></i>
+                            <strong>Remark:</strong> {order.remarks}
+                          </div>
+                        )}
+                        <div className="table-responsive">
+                          <table className="table table-sm align-middle order-table">
+                            <thead>
+                              <tr>
+                                <th>#</th>
+                                <th>Design</th>
+                                <th>Type</th>
+                                <th>Metal</th>
+                                <th>Tag No</th>
+                                <th>Net Wt (g)</th>
+                                <th>Qty</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
+                            </thead>
+                            <tbody>
+                              {order.items.map((it, i) => (
+                                <tr key={i}>
+                                  <td>{i + 1}</td>
+                                  <td>{it.SubProName}</td>
+                                  <td>{it.ProName || "-"}</td>
+                                  <td>{it.metal || "-"}</td>
+                                  <td>{formatTag(it.TagNo) || "-"}</td>
+                                  <td>{it.NetWt}</td>
+                                  <td>{it.qty}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </div>
       )}
