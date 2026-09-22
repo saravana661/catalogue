@@ -10,6 +10,7 @@ import axios from "axios";
 // .env.local without touching the committed .env. No code changes needed.
 // ─────────────────────────────────────────────────────────────────────────
 //http://localhost:5000/api
+//https://kalash.app/api
 const BASE_URL ="https://kalash.app/api";
 
 const api = axios.create({

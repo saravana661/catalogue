@@ -51,6 +51,7 @@ function Navbar({ onSearch, searchTerm }) {
               style={{ height: "52px", objectFit: "contain" }}
               className="navbar-logo d-inline"
             />
+            {/*JewelSphere  Pothys Swarnamahal*/}
             <span className="navbar-brand-text d-none d-md-inline">JewelSphere</span>
           </Link>
 

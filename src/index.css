@@ -1470,3 +1470,329 @@ code {
     display: none;
   }
 }
+
+/* ============ VIEW / ZOOM LIGHTBOX ============ */
+.view-btn {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 16, 8, 0.65);
+  color: #fff;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  border-radius: 50px;
+  padding: 5px 14px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.25s, background 0.25s;
+  z-index: 3;
+}
+.product-img-wrap:hover .view-btn,
+.view-btn:focus-visible {
+  opacity: 1;
+}
+.view-btn:hover {
+  background: rgba(212, 175, 55, 0.9);
+  color: #3a2c10;
+}
+.img-placeholder {
+  cursor: pointer;
+}
+.no-img-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.62rem;
+  letter-spacing: 1px;
+  color: #b9a65e;
+  text-transform: uppercase;
+}
+
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(10, 8, 4, 0.82);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.lightbox-card {
+  width: min(880px, 100%);
+  max-height: 92vh;
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+.lightbox-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #eee4ca;
+  background: #fffdf7;
+}
+.lightbox-title h5 {
+  margin: 0;
+  font-weight: 800;
+  color: #3a2c10;
+}
+.lightbox-title span {
+  font-size: 0.78rem;
+  color: #8a6d3b;
+}
+.lightbox-close {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: #f7ead1;
+  color: #7a5a20;
+  font-size: 1rem;
+  display: grid;
+  place-items: center;
+  transition: 0.2s;
+}
+.lightbox-close:hover {
+  background: #d4af37;
+  color: #fff;
+  transform: rotate(90deg);
+}
+.lightbox-img-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 320px;
+  background: #1a1a1a;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  touch-action: none;
+}
+.lightbox-img-wrap img {
+  max-width: 100%;
+  max-height: 62vh;
+  object-fit: contain;
+  user-select: none;
+  will-change: transform;
+  transition: transform 0.08s linear;
+}
+.zoom-pill {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffd968;
+  border: 1px solid rgba(255, 217, 104, 0.35);
+  border-radius: 50px;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  backdrop-filter: blur(4px);
+}
+.img-placeholder-lg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: #d4af37;
+}
+.img-placeholder-lg i {
+  font-size: 4.5rem;
+  opacity: 0.45;
+}
+.img-placeholder-lg p {
+  color: #a8a8a8;
+  font-size: 0.85rem;
+  margin: 0;
+}
+.lightbox-foot {
+  padding: 12px 18px 14px;
+  border-top: 1px solid #eee4ca;
+  background: #fffdf7;
+}
+.lightbox-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 0.8rem;
+  color: #5c5346;
+}
+.lightbox-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 4px;
+}
+.lightbox-controls button {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid #d4af37;
+  background: #fff;
+  color: #8a6d3b;
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+  transition: 0.2s;
+}
+.lightbox-controls button:hover:not(:disabled) {
+  background: #d4af37;
+  color: #fff;
+}
+.lightbox-controls button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.zoom-value {
+  min-width: 52px;
+  text-align: center;
+  font-weight: 800;
+  color: #3a2c10;
+  font-size: 0.85rem;
+}
+.lightbox-controls .zoom-reset {
+  border-color: #b9a65e;
+  color: #7a5a20;
+}
+.lightbox-hint {
+  margin: 0;
+  font-size: 0.7rem;
+  color: #9a8a68;
+}
+
+/* ============ ORDER STATUS ============ */
+.status-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1.5px solid #e2c98c;
+  border-radius: 50px;
+  padding: 4px 26px 4px 12px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  background-color: #ffffff;
+  color: #6d551f;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a6d3b'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.status-badge {
+  display: inline-block;
+  border-radius: 50px;
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.status-order-placed {
+  background: #fff4d6;
+  color: #9a6300;
+  border: 1px solid #e8c56b;
+}
+.status-work-in-progress {
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+}
+.status-shipped {
+  background: #f3e5f5;
+  color: #7b1fa2;
+  border: 1px solid #ce93d8;
+}
+.status-delivered {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+/* ============ ORDER TRACK (user) ============ */
+.order-track {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+  margin: 12px 0 16px;
+  padding: 14px 6px;
+  background: #faf6ee;
+  border-radius: 12px;
+  position: relative;
+}
+.order-track::before {
+  content: "";
+  position: absolute;
+  top: 26px;
+  left: 8%;
+  right: 8%;
+  height: 3px;
+  background: #e6d9b4;
+  border-radius: 2px;
+}
+.order-track .track-step {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.track-step .track-dot {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #e0d2a8;
+  color: #b9a65e;
+  font-size: 0.78rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  transition: 0.3s;
+}
+.track-step.done .track-dot {
+  background: #2e8b57;
+  border-color: #2e8b57;
+  color: #fff;
+}
+.track-step.current .track-dot {
+  background: #d4af37;
+  border-color: #d4af37;
+  color: #fff;
+  box-shadow: 0 0 0 5px rgba(212, 175, 55, 0.22);
+}
+.track-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #9a8a68;
+  line-height: 1.15;
+  max-width: 90px;
+}
+.track-step.done .track-label,
+.track-step.current .track-label {
+  color: #3a2c10;
+}
+@media (max-width: 520px) {
+  .track-label {
+    font-size: 0.58rem;
+    max-width: 64px;
+  }
+  .order-track::before {
+    top: 23px;
+  }
+  .track-step .track-dot {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+}

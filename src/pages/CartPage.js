@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useLoginModal } from "../context/LoginModalContext";
+import { formatTag } from "../utils/format";
 import api from "../api/axios";
 
 function CartPage() {
@@ -162,7 +163,7 @@ function CartPage() {
                         </span>
                       )}
                       <span>
-                        <i className="bi bi-tag"></i> {item.TagNo || "N/A"}
+                        <i className="bi bi-tag"></i> {formatTag(item.TagNo) || "N/A"}
                       </span>
                       <span>
                         <i className="bi bi-bounding-box"></i> {item.NetWt} g

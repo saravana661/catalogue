@@ -2,18 +2,27 @@ import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../api/axios";
 
-// Fixed catalogue category chips (GOLD by MetalCode, rest by product name LIKE)
+// Fixed catalogue category chips (product name LIKE filters)
 // pro/nopro accept comma-separated keywords (OR'd includes / AND NOT excludes)
 const CATEGORIES = [
-  { label: "GOLD", param: "metal", value: "G" },
-  { label: "DIAMOND", param: "pro", value: "DIA", nopro: "DIAL" },
   { label: "EARRINGS", param: "pro", value: "EARRING,EAR RING,EAR STUD,EARSTUD" },
   { label: "RINGS", param: "pro", value: "RING", nopro: "EARRING,EAR RING" },
   { label: "PENDANTS", param: "pro", value: "PENDANT" },
   { label: "NECKLACES", param: "pro", value: "NECKLACE" },
-  { label: "THALI CHAINS", param: "pro", value: "THALI", noImg: true },
-  { label: "COINS AND BARS", param: "pro", value: "COIN,BAR", nopro: "MALABAR,SOUND", noImg: true },
+ // { label: "THALI CHAINS", param: "pro", value: "THALI", noImg: true },
+  //{ label: "COINS AND BARS", param: "pro", value: "COIN,BAR", nopro: "MALABAR,SOUND", noImg: true },
 ];
+
+// NOTE: must be module-scope, never defined inside the component render.
+// Defining a component inside the render body gives it a new identity on every
+// render, which makes React unmount + remount its subtree — that's what made
+// inputs lose focus after every keystroke.
+const FilterRow = ({ children, label }) => (
+  <div className="filter-field">
+    <label>{label}</label>
+    {children}
+  </div>
+);
 
 function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart }) {
   const [activeCat, setActiveCat] = useState("");
@@ -92,13 +101,6 @@ function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart
   const hasActiveFilter =
     activeCat || tag || fromWt || toWt || keyword;
 
-  const FilterRow = ({ children, label }) => (
-    <div className="filter-field">
-      <label>{label}</label>
-      {children}
-    </div>
-  );
-
   const renderChips = (action) => (
     <div className="chip-block">
       <span className="chip-label">
@@ -149,21 +151,21 @@ function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart
 
       <FilterRow label="Weight From (g)">
         <input
-          type="number"
-          step="0.001"
-          placeholder="0"
+          type="text"
+          inputMode="decimal"
+          placeholder="Min"
           value={fromWt}
-          onChange={(e) => setFromWt(e.target.value)}
+          onChange={(e) => setFromWt(e.target.value.replace(/[^0-9.]/g, ""))}
         />
       </FilterRow>
 
       <FilterRow label="Weight To (g)">
         <input
-          type="number"
-          step="0.001"
-          placeholder="0"
+          type="text"
+          inputMode="decimal"
+          placeholder="Max"
           value={toWt}
-          onChange={(e) => setToWt(e.target.value)}
+          onChange={(e) => setToWt(e.target.value.replace(/[^0-9.]/g, ""))}
         />
       </FilterRow>
     </div>

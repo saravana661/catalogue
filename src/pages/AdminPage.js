@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
+import { formatTag } from "../utils/format";
 
 const ADMIN_USER = "admin";
 const ADMIN_PASS = "admin123"; // local fallback when API/DB is unreachable
+
+const ORDER_STATUSES = ["Order Placed", "Work in Progress", "Shipped", "Delivered"];
 
 function AdminPage() {
   const [loggedIn, setLoggedIn] = useState(
@@ -71,6 +74,19 @@ function AdminPage() {
     sessionStorage.removeItem("pothysAdmin");
     setLoggedIn(false);
     setOrders([]);
+  };
+
+  const handleStatusChange = async (order, status) => {
+    const prev = orders;
+    setOrders((list) =>
+      list.map((o) => (o.id === order.id ? { ...o, status } : o))
+    );
+    try {
+      await api.patch(`/orders/${order.id}/status`, { status });
+    } catch (err) {
+      setOrders(prev);
+      alert("Failed to update status: " + (err.response?.data?.error || err.message));
+    }
   };
 
   const fmtDate = (iso) => {
@@ -215,6 +231,20 @@ function AdminPage() {
                       {order.customer?.name || "Guest"}
                     </span>
                     <span className="order-items-badge">{order.totalItems} items</span>
+                    <select
+                      className={`status-select status-${String(order.status || "Order Placed")
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}`}
+                      value={order.status || "Order Placed"}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => handleStatusChange(order, e.target.value)}
+                    >
+                      {ORDER_STATUSES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
                     <i
                       className={`bi ${expanded === order.id ? "bi-chevron-up" : "bi-chevron-down"}`}
                     ></i>
@@ -269,7 +299,7 @@ function AdminPage() {
                                 <td>{it.SubProName}</td>
                                 <td>{it.ProName || "-"}</td>
                                 <td>{it.metal || "-"}</td>
-                                <td>{it.TagNo || "-"}</td>
+                                <td>{formatTag(it.TagNo) || "-"}</td>
                                 <td>{it.NetWt}</td>
                                 <td>{it.qty}</td>
                               </tr>
