@@ -9,8 +9,8 @@ const CATEGORIES = [
   { label: "RINGS", param: "pro", value: "RING", nopro: "EARRING,EAR RING" },
   { label: "PENDANTS", param: "pro", value: "PENDANT" },
   { label: "NECKLACES", param: "pro", value: "NECKLACE" },
-  { label: "THALI CHAINS", param: "pro", value: "THALI", noImg: true },
-  { label: "COINS AND BARS", param: "pro", value: "COIN,BAR", nopro: "MALABAR,SOUND", noImg: true },
+ // { label: "THALI CHAINS", param: "pro", value: "THALI", noImg: true },
+  //{ label: "COINS AND BARS", param: "pro", value: "COIN,BAR", nopro: "MALABAR,SOUND", noImg: true },
 ];
 
 // NOTE: must be module-scope, never defined inside the component render.

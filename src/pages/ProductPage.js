@@ -40,8 +40,8 @@ function ProductPage({ initialTerm = "" }) {
           transition={{ duration: 0.6 }}
         >
           
-{/*JewelSphere Online */ }
-          <h1 className="site-hero-title">Pothys Swarnamahal</h1>
+{/*JewelSphere Online  Pothys Swarnamahal*/ }
+          <h1 className="site-hero-title"> JewelSphere Online </h1>
           <p>Explore timeless gold, silver, diamond & platinum designs</p>
         </motion.div>
         <motion.div
