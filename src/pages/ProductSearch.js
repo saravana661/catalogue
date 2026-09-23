@@ -40,16 +40,20 @@ function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart
   const runSearch = (overrides = {}) => {
     const params = new URLSearchParams();
     const cat = overrides.cat !== undefined ? overrides.cat : activeCat;
+    const from = overrides.fromWt !== undefined ? overrides.fromWt : fromWt;
+    const to = overrides.toWt !== undefined ? overrides.toWt : toWt;
+    const tg = overrides.tag !== undefined ? overrides.tag : tag;
+    const kw = overrides.keyword !== undefined ? overrides.keyword : keyword;
     const chip = CATEGORIES.find((c) => c.label === cat);
-    if (keyword) params.append("name", keyword);
+    if (kw) params.append("name", kw);
     if (chip) {
       params.append(chip.param, chip.value);
       if (chip.nopro) params.append("nopro", chip.nopro);
       if (chip.noImg) params.append("noImg", "1");
     }
-    if (fromWt) params.append("fromWt", fromWt);
-    if (toWt) params.append("toWt", toWt);
-    if (tag) params.append("tag", tag);
+    if (from) params.append("fromWt", from);
+    if (to) params.append("toWt", to);
+    if (tg) params.append("tag", tg);
 
     setLoading(true);
     if (onSearchStart) onSearchStart();
@@ -95,7 +99,8 @@ function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart
     setToWt("");
     setTag("");
     onKeywordChange("");
-    onSearchResult([]);
+    // Reload the full catalogue (all chips / All designs) — no filters
+    runSearch({ cat: "", fromWt: "", toWt: "", tag: "", keyword: "" });
   };
 
   const hasActiveFilter =

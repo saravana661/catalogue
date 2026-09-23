@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
-import { formatTag } from "../utils/format";
+import { formatTag, imgSrc } from "../utils/format";
 import { useLoginModal } from "../context/LoginModalContext";
 
 function WishlistPage() {
@@ -71,9 +71,9 @@ function WishlistPage() {
               >
                 <motion.div className="product-card" whileHover={{ y: -10 }}>
                   <div className="product-img-wrap">
-                    {item.ImageBase64 && (
+                    {imgSrc(item) && (
                       <img
-                        src={`data:image/jpeg;base64,${item.ImageBase64}`}
+                        src={imgSrc(item)}
                         alt={item.SubProName}
                         className="product-card-img loaded"
                         loading="lazy"

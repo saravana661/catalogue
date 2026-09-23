@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
 import { formatTag } from "../utils/format";
+import AdminImages from "../components/AdminImages";
 
 const ADMIN_USER = "admin";
 const ADMIN_PASS = "admin123"; // local fallback when API/DB is unreachable
@@ -21,6 +22,8 @@ function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(null);
+  const [updatingStatus, setUpdatingStatus] = useState(null);
+  const [tab, setTab] = useState("orders");
 
   useEffect(() => {
     if (!loggedIn) return;
@@ -78,14 +81,18 @@ function AdminPage() {
 
   const handleStatusChange = async (order, status) => {
     const prev = orders;
+    setUpdatingStatus(order.id);
     setOrders((list) =>
       list.map((o) => (o.id === order.id ? { ...o, status } : o))
     );
     try {
-      await api.patch(`/orders/${order.id}/status`, { status });
+      const res = await api.patch(`/orders/${order.id}/status`, { status });
+      if (res.data.status !== status) throw new Error("response mismatch");
     } catch (err) {
       setOrders(prev);
       alert("Failed to update status: " + (err.response?.data?.error || err.message));
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
@@ -175,10 +182,12 @@ function AdminPage() {
       <div className="admin-head">
         <div>
           <h2>
-            <i className="bi bi-clipboard-data me-2"></i> Order Details
+            <i className="bi bi-clipboard-data me-2"></i> {tab === "images" ? "Image Manager" : "Order Details"}
           </h2>
           <p className="text-muted small mb-0">
-            {orders.length} order(s) received
+            {tab === "images"
+              ? "Manage product images used in the catalogue"
+              : `${orders.length} order(s) received`}
           </p>
         </div>
         <div className="d-flex gap-2">
@@ -191,7 +200,24 @@ function AdminPage() {
         </div>
       </div>
 
-      {loading ? (
+      <div className="admin-tabs">
+        <button
+          className={`admin-tab ${tab === "orders" ? "active" : ""}`}
+          onClick={() => setTab("orders")}
+        >
+          <i className="bi bi-clipboard-data me-1"></i> Orders
+        </button>
+        <button
+          className={`admin-tab ${tab === "images" ? "active" : ""}`}
+          onClick={() => setTab("images")}
+        >
+          <i className="bi bi-images me-1"></i> Image Manager
+        </button>
+      </div>
+
+      {tab === "images" ? (
+        <AdminImages />
+      ) : loading ? (
         <div className="app-loader">
           <div className="loader-ring">
             <span className="loader-gem">◆</span>
@@ -231,25 +257,33 @@ function AdminPage() {
                       {order.customer?.name || "Guest"}
                     </span>
                     <span className="order-items-badge">{order.totalItems} items</span>
-                    <select
-                      className={`status-select status-${String(order.status || "Order Placed")
-                        .toLowerCase()
-                        .replace(/\s+/g, "-")}`}
-                      value={order.status || "Order Placed"}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={(e) => handleStatusChange(order, e.target.value)}
-                    >
-                      {ORDER_STATUSES.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
                     <i
                       className={`bi ${expanded === order.id ? "bi-chevron-up" : "bi-chevron-down"}`}
                     ></i>
                   </div>
                 </button>
+
+                <div className="order-card-statusbar">
+                  <span className="statusbar-label">Status</span>
+                  <select
+                    className={`status-select status-${String(order.status || "Order Placed")
+                      .toLowerCase()
+                      .replace(/\s+/g, "-")}`}
+                    value={order.status || "Order Placed"}
+                    onChange={(e) => handleStatusChange(order, e.target.value)}
+                  >
+                    {ORDER_STATUSES.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                  {updatingStatus === order.id && (
+                    <span className="statusbar-updating">
+                      <i className="bi bi-arrow-repeat me-1"></i>saving...
+                    </span>
+                  )}
+                </div>
 
                 <AnimatePresence>
                   {expanded === order.id && (
@@ -289,6 +323,8 @@ function AdminPage() {
                               <th>Metal</th>
                               <th>Tag No</th>
                               <th>Net Wt (g)</th>
+                              <th>Pref Wt</th>
+                              <th>Pref Size</th>
                               <th>Qty</th>
                             </tr>
                           </thead>
@@ -301,6 +337,8 @@ function AdminPage() {
                                 <td>{it.metal || "-"}</td>
                                 <td>{formatTag(it.TagNo) || "-"}</td>
                                 <td>{it.NetWt}</td>
+                                <td>{it.preferredWt || "-"}</td>
+                                <td>{it.preferredSize || "-"}</td>
                                 <td>{it.qty}</td>
                               </tr>
                             ))}
