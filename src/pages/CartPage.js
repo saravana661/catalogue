@@ -4,13 +4,13 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useLoginModal } from "../context/LoginModalContext";
-import { formatTag } from "../utils/format";
+import { formatTag, imgSrc } from "../utils/format";
 import api from "../api/axios";
 
 function CartPage() {
   const { isAuthenticated, user } = useAuth();
   const { requireLogin } = useLoginModal();
-  const { cart, removeFromCart, updateQty, clearCart } = useCart();
+  const { cart, removeFromCart, updateQty, updatePrefs, clearCart } = useCart();
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [placing, setPlacing] = useState(false);
@@ -45,6 +45,8 @@ function CartPage() {
         NetWt: item.NetWt,
         metal: item.metal || item.MetalName,
         qty: item.qty,
+        preferredWt: item.prefWt || "",
+        preferredSize: item.prefSize || "",
       }));
       const res = await api.post("/orders", {
         items: cleanItems,
@@ -145,9 +147,9 @@ function CartPage() {
                   transition={{ type: "spring", stiffness: 200, damping: 22 }}
                 >
                   <div className="cart-item-img">
-                    {item.ImageBase64 ? (
+                    {imgSrc(item) ? (
                       <img
-                        src={`data:image/jpeg;base64,${item.ImageBase64}`}
+                        src={imgSrc(item)}
                         alt={item.SubProName}
                       />
                     ) : (
@@ -189,6 +191,31 @@ function CartPage() {
                     >
                       <i className="bi bi-trash"></i>
                     </button>
+                  </div>
+                  <div className="cart-item-prefs">
+                    <div className="pref-field">
+                      <label htmlFor={`prefwt-${item.id}`}>Pref Wt (g)</label>
+                      <input
+                        id={`prefwt-${item.id}`}
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Optional"
+                        value={item.prefWt || ""}
+                        onChange={(e) =>
+                          updatePrefs(item.id, "prefWt", e.target.value.replace(/[^0-9.,]/g, ""))
+                        }
+                      />
+                    </div>
+                    <div className="pref-field">
+                      <label htmlFor={`prefsize-${item.id}`}>Pref Size</label>
+                      <input
+                        id={`prefsize-${item.id}`}
+                        type="text"
+                        placeholder="Optional"
+                        value={item.prefSize || ""}
+                        onChange={(e) => updatePrefs(item.id, "prefSize", e.target.value)}
+                      />
+                    </div>
                   </div>
                 </motion.div>
               ))}

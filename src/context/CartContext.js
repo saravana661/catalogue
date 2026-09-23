@@ -46,6 +46,12 @@ export const CartProvider = ({ children }) => {
     );
   };
 
+  const updatePrefs = (id, field, value) => {
+    setCart((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
+    );
+  };
+
   const clearCart = () => setCart([]);
 
   const cartCount = cart.reduce((sum, p) => sum + p.qty, 0);
@@ -62,6 +68,7 @@ export const CartProvider = ({ children }) => {
         addToCart,
         removeFromCart,
         updateQty,
+        updatePrefs,
         clearCart,
         cartCount,
         cartTotal,

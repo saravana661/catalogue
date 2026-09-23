@@ -181,6 +181,8 @@ function MyOrdersPage() {
                                 <th>Metal</th>
                                 <th>Tag No</th>
                                 <th>Net Wt (g)</th>
+                                <th>Pref Wt</th>
+                                <th>Pref Size</th>
                                 <th>Qty</th>
                               </tr>
                             </thead>
@@ -193,6 +195,8 @@ function MyOrdersPage() {
                                   <td>{it.metal || "-"}</td>
                                   <td>{formatTag(it.TagNo) || "-"}</td>
                                   <td>{it.NetWt}</td>
+                                  <td>{it.preferredWt || "-"}</td>
+                                  <td>{it.preferredSize || "-"}</td>
                                   <td>{it.qty}</td>
                                 </tr>
                               ))}

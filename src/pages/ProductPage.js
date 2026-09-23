@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import ProductSearch from "./ProductSearch";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
+import { imgSrc } from "../utils/format";
 
 function ProductPage({ initialTerm = "" }) {
   const [keyword, setKeyword] = useState(initialTerm);
@@ -84,11 +85,7 @@ function ProductPage({ initialTerm = "" }) {
               <div className="col-6 col-md-4 col-lg-3" key={item.id}>
                 <ProductCard
                   item={item}
-                  imgSrc={
-                    item.ImageBase64
-                      ? `data:image/jpeg;base64,${item.ImageBase64}`
-                      : null
-                  }
+                  imgSrc={imgSrc(item)}
                 />
               </div>
             ))}

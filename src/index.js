@@ -6,11 +6,8 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { LoginModalProvider } from './context/LoginModalContext';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-
-const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const AppWithProviders = (
   <React.StrictMode>
@@ -18,13 +15,7 @@ const AppWithProviders = (
       <CartProvider>
         <WishlistProvider>
           <LoginModalProvider>
-            {googleClientId ? (
-              <GoogleOAuthProvider clientId={googleClientId}>
-                <App />
-              </GoogleOAuthProvider>
-            ) : (
-              <App />
-            )}
+            <App />
           </LoginModalProvider>
         </WishlistProvider>
       </CartProvider>

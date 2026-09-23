@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../context/AuthContext";
 import { useLoginModal } from "../context/LoginModalContext";
 import api from "../api/axios";
@@ -11,32 +10,15 @@ const validUsers = [
   { email: "admin", name: "Admin", password: "12345" },
 ];
 
-async function postAuth(path, body) {
-  try {
-    const res = await api.post(path, body);
-    return { ok: true, data: res.data, status: res.status };
-  } catch (err) {
-    return {
-      ok: false,
-      data: err.response?.data || {},
-      status: err.response?.status || 0,
-    };
-  }
-}
-
 function LoginModal() {
   const { open, closeModal, onSuccess } = useLoginModal();
   const { login } = useAuth();
 
-  const [isSignup, setIsSignup] = useState(false);
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [shake, setShake] = useState(0);
-
-  const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
   const fail = (msg) => {
     setError(msg);
@@ -46,54 +28,11 @@ function LoginModal() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
-    if (isSignup) {
-      if (!name.trim() || !email.includes("@") || password.length < 4) {
-        return fail("Please fill all fields (password min 4 chars).");
-      }
-      setBusy(true);
-      try {
-        const { ok, data, status } = await postAuth("/register", {
-          name: name.trim(),
-          email: email.trim(),
-          password,
-        });
-        if (ok) {
-          login({ name: data.name, email: data.email, role: data.role }, "manual");
-          onSuccess();
-        } else if (status === 409) {
-          fail(data.error || "Email already registered");
-        } else {
-          fail(data.error || "Registration failed");
-        }
-      } catch (err) {
-        // API/DB unreachable -> local demo signup
-        login({ name: name.trim(), email: email.trim() }, "manual");
-        onSuccess();
-      } finally {
-        setBusy(false);
-      }
-      return;
-    }
-
-    // Sign in
     setBusy(true);
     try {
-      const { ok, data } = await postAuth("/login", { email: email.trim(), password });
-      if (ok) {
-        login({ name: data.name, email: data.email, role: data.role }, "manual");
-        onSuccess();
-      } else {
-        const match = validUsers.find(
-          (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-        );
-        if (match) {
-          login({ name: match.name, email: match.email }, "manual");
-          onSuccess();
-        } else {
-          fail("Invalid email or password");
-        }
-      }
+      const res = await api.post("/login", { email: email.trim(), password });
+      login({ name: res.data.name, email: res.data.email, role: res.data.role }, "manual");
+      onSuccess();
     } catch (err) {
       const match = validUsers.find(
         (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
@@ -101,30 +40,14 @@ function LoginModal() {
       if (match) {
         login({ name: match.name, email: match.email }, "manual");
         onSuccess();
+      } else if (err.response?.status === 401) {
+        fail(err.response.data?.error || "Invalid email or password");
       } else {
         fail("Server unreachable. Check credentials or start the server.");
       }
     } finally {
       setBusy(false);
     }
-  };
-
-  const handleGoogle = (cred) => {
-    try {
-      const decoded = JSON.parse(atob(cred.credential.split(".")[1]));
-      login(
-        { name: decoded.name, email: decoded.email, picture: decoded.picture },
-        "google"
-      );
-      onSuccess();
-    } catch (err) {
-      fail("Could not read Google profile.");
-    }
-  };
-
-  const resetForm = () => {
-    setIsSignup(false);
-    setError("");
   };
 
   return (
@@ -156,66 +79,18 @@ function LoginModal() {
 
             <div className="login-modal-head">
               <span className="login-logo-icon">◆</span>
-              <motion.h3
-                key={isSignup ? "s" : "l"}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                {isSignup ? "Create Account" : "Welcome Back"}
-              </motion.h3>
+              <motion.h3>SIGN IN</motion.h3>
               <p className="login-subtitle">
-                {isSignup
-                  ? "Save credentials & order your favourite designs"
-                  : "Sign in to like designs and add to cart"}
+                Sign in to like designs and add to cart
               </p>
             </div>
 
-            {/* Google */}
-            <div className="google-login-wrap mb-3">
-              {clientId ? (
-                <GoogleLogin
-                  clientId={clientId}
-                  onSuccess={handleGoogle}
-                  onError={() => {
-                    fail("Google sign in failed. Try manual login.");
-                  }}
-                />
-              ) : (
-                <button
-                  className="btn btn-google"
-                  onClick={() => {
-                    login({ name: "Google User", email: "google@gmail.com" }, "google");
-                    onSuccess();
-                  }}
-                >
-                  <i className="bi bi-google me-2"></i> Sign in with Google
-                </button>
-              )}
-            </div>
-
-            <div className="divider">
-              <span>or continue with</span>
-            </div>
-
             <form onSubmit={handleSubmit}>
-              {isSignup && (
-                <div className="login-field">
-                  <i className="bi bi-person"></i>
-                  <input
-                    type="text"
-                    placeholder="Full Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </div>
-              )}
-
               <div className="login-field">
                 <i className="bi bi-envelope"></i>
                 <input
                   type="text"
-                  placeholder={isSignup ? "Email" : "Email or Username"}
+                  placeholder="Email or Username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -252,10 +127,6 @@ function LoginModal() {
                     <span className="spinner-border spinner-border-sm me-2"></span>
                     Please wait...
                   </>
-                ) : isSignup ? (
-                  <>
-                    <i className="bi bi-person-plus me-2"></i> Sign Up & Continue
-                  </>
                 ) : (
                   <>
                     <i className="bi bi-box-arrow-in-right me-2"></i> Login & Continue
@@ -265,26 +136,6 @@ function LoginModal() {
             </form>
 
             <div className="login-modal-foot">
-              <span className="switch-mode">
-                {isSignup ? (
-                  <>
-                    Already have an account?{" "}
-                    <button
-                      onClick={() => {
-                        resetForm();
-                        setIsSignup(false);
-                      }}
-                    >
-                      Sign In
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    New here?{" "}
-                    <button onClick={() => setIsSignup(true)}>Create Account</button>
-                  </>
-                )}
-              </span>
               <button className="guest-link" onClick={closeModal}>
                 Continue as Guest
               </button>
