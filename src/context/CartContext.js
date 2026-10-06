@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
+import { persistItems } from "../utils/storage";
 
 const CartContext = createContext();
 
@@ -17,7 +18,7 @@ export const CartProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(cart));
+    persistItems("cartItems", cart);
   }, [cart]);
 
   const addToCart = (item) => {

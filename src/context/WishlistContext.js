@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
+import { persistItems } from "../utils/storage";
 
 const WishlistContext = createContext();
 
@@ -17,7 +18,7 @@ export const WishlistProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("wishlistItems", JSON.stringify(wishlist));
+    persistItems("wishlistItems", wishlist);
   }, [wishlist]);
 
   const isLiked = (id) => wishlist.some((p) => p.id === id);
