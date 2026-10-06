@@ -76,6 +76,7 @@ function ProductCard({ item, imgSrc }) {
           )}
 
           {item.MetalName && <span className="product-badge">{item.MetalName}</span>}
+          {item.isNewArrival && <span className="product-badge badge-new">NEW</span>}
 
           {/* View / zoom button */}
           <button

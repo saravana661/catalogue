@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import api from "../api/axios";
+import Pagination from "./Pagination";
 import { imgSrc } from "../utils/format";
 
 function AdminImages() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState("");
   const [form, setForm] = useState({
     TagNo: "",
     SubProName: "",
@@ -18,12 +23,24 @@ function AdminImages() {
     file: null,
   });
 
-  const load = (keyword = "") => {
+  const load = (keyword = "", pg = 1) => {
     setLoading(true);
     api
-      .get("/admin/images", { params: keyword ? { q: keyword } : {} })
-      .then((res) => setList(Array.isArray(res.data) ? res.data : []))
-      .catch((err) => setList([]))
+      .get("/admin/images", {
+        params: { page: pg, limit: 50, ...(keyword ? { q: keyword } : {}) },
+      })
+      .then((res) => {
+        const d = res.data || {};
+        setList(Array.isArray(d.rows) ? d.rows : []);
+        setPage(d.page || 1);
+        setPages(d.pages || 1);
+        setTotal(d.total || 0);
+      })
+      .catch((err) => {
+        setList([]);
+        setTotal(0);
+        setPages(1);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -33,6 +50,10 @@ function AdminImages() {
 
   const submitForm = async (e) => {
     e.preventDefault();
+    if (!form.file) {
+      alert("Please select an image file to upload.");
+      return;
+    }
     setBusy(true);
     try {
       const fd = new FormData();
@@ -41,12 +62,14 @@ function AdminImages() {
       fd.append("ProName", form.ProName.trim());
       fd.append("MetalName", form.MetalName.trim());
       fd.append("NetWt", form.NetWt.trim());
-      if (form.file) fd.append("file", form.file);
+      fd.append("file", form.file);
       await api.post("/admin/images", fd);
       setForm({ TagNo: "", SubProName: "", ProName: "", MetalName: "", NetWt: "", file: null });
+      if (preview) URL.revokeObjectURL(preview);
+      setPreview("");
       setShowForm(false);
       setQ("");
-      load();
+      load("", 1);
     } catch (err) {
       alert("Upload failed: " + (err.response?.data?.error || err.message));
     } finally {
@@ -54,10 +77,21 @@ function AdminImages() {
     }
   };
 
+  const handleFile = (file) => {
+    if (preview) URL.revokeObjectURL(preview);
+    if (!file) {
+      setPreview("");
+      setForm((f) => ({ ...f, file: null }));
+      return;
+    }
+    setForm((f) => ({ ...f, file }));
+    setPreview(URL.createObjectURL(file));
+  };
+
   const toggleActive = async (row) => {
     try {
       await api.patch(`/admin/images/${row.id}/active`, { active: !row.IsActive });
-      load(q);
+      load(q, page);
     } catch (err) {
       alert("Update failed: " + (err.response?.data?.error || err.message));
     }
@@ -67,7 +101,7 @@ function AdminImages() {
     if (!window.confirm(`Delete image for Tag ${row.TagNo}?`)) return;
     try {
       await api.delete(`/admin/images/${row.id}`);
-      load(q);
+      load(q, page);
     } catch (err) {
       alert("Delete failed: " + (err.response?.data?.error || err.message));
     }
@@ -83,7 +117,7 @@ function AdminImages() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
-          <button className="btn btn-dark btn-sm" onClick={() => load(q)}>
+          <button className="btn btn-dark btn-sm" onClick={() => load(q, 1)}>
             <i className="bi bi-search me-1"></i> Search
           </button>
           <button className="btn btn-gold btn-sm" onClick={() => setShowForm(!showForm)}>
@@ -144,12 +178,27 @@ function AdminImages() {
               />
             </div>
             <div className="col-md-8">
-              <input
-                className="admin-file"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setForm({ ...form, file: e.target.files?.[0] || null })}
-              />
+              <div className="admin-file-row">
+                <input
+                  className="admin-file"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFile(e.target.files?.[0] || null)}
+                />
+                {preview && (
+                  <div className="admin-img-preview">
+                    <img src={preview} alt="Selected preview" />
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-danger admin-preview-remove"
+                      onClick={() => handleFile(null)}
+                      aria-label="Clear selected image"
+                    >
+                      <i className="bi bi-x-lg"></i>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="col-md-4 d-flex gap-2">
               <button className="btn btn-gold w-100" type="submit" disabled={busy}>
@@ -188,45 +237,53 @@ function AdminImages() {
           <p>Use "Add / Upload Image" or run the extraction process.</p>
         </div>
       ) : (
-        <div className="admin-img-grid">
-          {list.map((row) => (
-            <motion.div
-              key={row.id}
-              className={`admin-img-card ${row.IsActive ? "" : "inactive"}`}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-            >
-              <div className="admin-img-thumb">
-                {imgSrc(row) ? (
-                  <img src={imgSrc(row)} alt={row.TagNo} loading="lazy" />
-                ) : (
-                  <span className="admin-img-no">No file</span>
-                )}
-                <span className={`admin-img-state ${row.IsActive ? "on" : "off"}`}>
-                  {row.IsActive ? "Active" : "Inactive"}
-                </span>
-              </div>
-              <div className="admin-img-body">
-                <div className="admin-img-tag">{fetchDisplayTag(row.TagNo)}</div>
-                <div className="admin-img-name">{row.SubProName || "—"}</div>
-                <div className="admin-img-meta">
-                  {row.ProName && <span>{row.ProName}</span>}
-                  {row.MetalName && <span>{row.MetalName}</span>}
-                  {row.NetWt != null && <span>{row.NetWt} g</span>}
+        <>
+          <div className="admin-img-count">
+            <span>{total} image{total !== 1 ? "s" : ""}</span>
+          </div>
+          <div className="admin-img-grid">
+            {list.map((row) => (
+              <motion.div
+                key={row.id}
+                className={`admin-img-card ${row.IsActive ? "" : "inactive"}`}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                <div className="admin-img-thumb">
+                  {imgSrc(row) ? (
+                    <img src={imgSrc(row)} alt={row.TagNo} loading="lazy" />
+                  ) : (
+                    <span className="admin-img-no">No file</span>
+                  )}
+                  <span className={`admin-img-state ${row.IsActive ? "on" : "off"}`}>
+                    {row.IsActive ? "Active" : "Inactive"}
+                  </span>
                 </div>
-                <div className="admin-img-actions">
-                  <button className="btn btn-sm btn-outline-primary" onClick={() => toggleActive(row)}>
-                    <i className={`bi ${row.IsActive ? "bi-eye-slash" : "bi-eye"} me-1`}></i>
-                    {row.IsActive ? "Hide" : "Show"}
-                  </button>
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => remove(row)}>
-                    <i className="bi bi-trash me-1"></i> Delete
-                  </button>
+                <div className="admin-img-body">
+                  <div className="admin-img-tag">{fetchDisplayTag(row.TagNo)}</div>
+                  <div className="admin-img-name">{row.SubProName || "—"}</div>
+                  <div className="admin-img-meta">
+                    {row.ProName && <span>{row.ProName}</span>}
+                    {row.MetalName && <span>{row.MetalName}</span>}
+                    {row.NetWt != null && <span>{row.NetWt} g</span>}
+                  </div>
+                  <div className="admin-img-actions">
+                    <button className="btn btn-sm btn-outline-primary" onClick={() => toggleActive(row)}>
+                      <i className={`bi ${row.IsActive ? "bi-eye-slash" : "bi-eye"} me-1`}></i>
+                      {row.IsActive ? "Hide" : "Show"}
+                    </button>
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => remove(row)}>
+                      <i className="bi bi-trash me-1"></i> Delete
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+          {pages > 1 && (
+            <Pagination page={page} pages={pages} onPage={(p) => load(q, p)} />
+          )}
+        </>
       )}
     </div>
   );
