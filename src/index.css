@@ -504,6 +504,11 @@ code {
   z-index: 4;
   box-shadow: 0 3px 10px rgba(163, 116, 10, 0.4);
 }
+.product-badge.badge-new {
+  top: 46px;
+  background: linear-gradient(135deg, #b3121d, #e02430);
+  box-shadow: 0 3px 10px rgba(179, 18, 29, 0.4);
+}
 .like-btn {
   position: absolute;
   top: 10px;
@@ -725,6 +730,54 @@ code {
   border-radius: 50px;
   margin-left: 10px;
   vertical-align: middle;
+}
+
+/* ============ PAGINATION ============ */
+.pagination-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 32px 0 8px;
+}
+.page-btn {
+  min-width: 40px;
+  padding: 7px 13px;
+  border-radius: 50px;
+  border: 1.5px solid #e2c98c;
+  background: #fff;
+  color: #5c5346;
+  font-weight: 700;
+  font-size: 0.82rem;
+  transition: all 0.25s;
+  cursor: pointer;
+}
+.page-btn:hover:not(:disabled) {
+  border-color: #d4af37;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(212, 175, 55, 0.2);
+}
+.page-btn.active {
+  background: linear-gradient(135deg, #d4af37, #b8860b);
+  color: #fff;
+  border-color: #b8860b;
+  box-shadow: 0 6px 16px rgba(184, 134, 11, 0.3);
+}
+.page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.page-ellipsis {
+  color: #a99a80;
+  font-weight: 700;
+  padding: 0 2px;
+}
+.admin-img-count {
+  font-size: 0.8rem;
+  color: #8a7a5f;
+  font-weight: 600;
+  margin: 0 4px 10px;
 }
 
 /* ============ CART ============ */
@@ -1824,6 +1877,36 @@ code {
   font-size: 0.82rem;
   color: #6d551f;
   padding: 8px 0;
+}
+.admin-file-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.admin-img-preview {
+  position: relative;
+  width: 74px;
+  height: 74px;
+  border: 1.5px solid #e2c98c;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  flex: 0 0 auto;
+}
+.admin-img-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.admin-preview-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  padding: 0 5px;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  line-height: 1.4;
 }
 .admin-img-form {
   border: 1.5px dashed #e2c98c;

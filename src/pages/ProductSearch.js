@@ -17,6 +17,9 @@ const CATEGORIES = [
 // Defining a component inside the render body gives it a new identity on every
 // render, which makes React unmount + remount its subtree — that's what made
 // inputs lose focus after every keystroke.
+
+// Chip label for the admin-uploaded "New Arrivals" feed (not a `pro` filter)
+export const NEW_ARRIVALS = "NEW ARRIVALS";
 const FilterRow = ({ children, label }) => (
   <div className="filter-field">
     <label>{label}</label>
@@ -24,7 +27,7 @@ const FilterRow = ({ children, label }) => (
   </div>
 );
 
-function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart }) {
+function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart, fetchPageRef }) {
   const [activeCat, setActiveCat] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -44,7 +47,10 @@ function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart
     const to = overrides.toWt !== undefined ? overrides.toWt : toWt;
     const tg = overrides.tag !== undefined ? overrides.tag : tag;
     const kw = overrides.keyword !== undefined ? overrides.keyword : keyword;
+    // New filter query always starts at page 1; only pagination passes a page
+    const pageNum = overrides.page !== undefined ? overrides.page : 1;
     const chip = CATEGORIES.find((c) => c.label === cat);
+    if (cat === NEW_ARRIVALS) params.append("newArrivals", "1");
     if (kw) params.append("name", kw);
     if (chip) {
       params.append(chip.param, chip.value);
@@ -54,6 +60,7 @@ function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart
     if (from) params.append("fromWt", from);
     if (to) params.append("toWt", to);
     if (tg) params.append("tag", tg);
+    if (pageNum > 1) params.append("page", pageNum);
 
     setLoading(true);
     if (onSearchStart) onSearchStart();
@@ -75,6 +82,14 @@ function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart
     }, 400);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyword]);
+
+  // Keep the pagination hook wired to the latest filter state
+  useEffect(() => {
+    if (fetchPageRef) {
+      fetchPageRef.current = (p) => runSearch({ page: p });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCat, fromWt, toWt, tag, keyword]);
 
   // Desktop: chip click searches immediately
   const handleCat = (c) => {
@@ -104,7 +119,7 @@ function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart
   };
 
   const hasActiveFilter =
-    activeCat || tag || fromWt || toWt || keyword;
+    activeCat !== "" || tag || fromWt || toWt || keyword;
 
   const renderChips = (action) => (
     <div className="chip-block">
@@ -117,6 +132,12 @@ function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart
           onClick={() => action("")}
         >
           All
+        </button>
+        <button
+          className={`chip ${activeCat === NEW_ARRIVALS ? "chip-active" : ""}`}
+          onClick={() => action(NEW_ARRIVALS)}
+        >
+          <i className="bi bi-stars me-1"></i> New Arrivals
         </button>
         {CATEGORIES.map((c) => (
           <button
@@ -148,9 +169,9 @@ function ProductSearch({ onSearchResult, keyword, onKeywordChange, onSearchStart
       <FilterRow label="Tag No">
         <input
           type="text"
-          placeholder="e.g. POT22H50001"
+          placeholder="e.g. 22H50001"
           value={tag}
-          onChange={(e) => setTag(e.target.value)}
+          onChange={(e) => setTag(e.target.value.replace(/^POT/i, ""))}
         />
       </FilterRow>
 
